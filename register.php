@@ -26,7 +26,6 @@ if( isset($_POST['submit']) ){
                         $_SESSION['email'] = $_POST['email'];
                        
                         header('Location: index.php');
-                        header('HTTP/1.1 200 OK'); 
                     
                     //jika gagal maka akan menampilkan pesan error
                     } else {

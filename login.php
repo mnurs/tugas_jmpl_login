@@ -28,7 +28,8 @@ if( isset($_POST['submit']) ){
             if ($rows != 0) { 
                     $_SESSION['email'] = $_POST['email'];
                
-                    header('Location: index.php');  
+                    header('Location: index.php'); 
+                    header('HTTP/1.1 200 OK'); 
             //jika gagal maka akan menampilkan pesan error
             } else {
                 $error =  'Login Gagal';

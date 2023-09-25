@@ -1,90 +1,86 @@
 <?php
-//menyertakan file program koneksi.php pada register
-require('config.php');
-//inisialisasi session
-session_start();
-$error = '';
-$validate = '';
-//mengecek apakah sesssion email tersedia atau tidak jika tersedia maka akan diredirect ke halaman index
-if( isset($_SESSION['email']) ) header('Location: index.php');
-//mengecek apakah form disubmit atau tidak
-if( isset($_POST['submit']) ){
-        
-        // // menghilangkan backshlases
-        // $email = stripslashes($_POST['email']);
-        // //cara sederhana mengamankan dari sql injection
-        // $email = mysqli_real_escape_string($db, $email);
-        //  // menghilangkan backshlases
-        // $password = stripslashes($_POST['password']);
-        //  //cara sederhana mengamankan dari sql injection
-        // $password = mysqli_real_escape_string($db, $password);
-       
-        //cek apakah nilai yang diinputkan pada form ada yang kosong atau tidak
-        // if(!empty(trim($email)) && !empty(trim($password))){
-            //select data berdasarkan email dari database
-            $query      = "SELECT * FROM users WHERE email = '".$_POST['email']."' AND password = '".$_POST['password']."'";
-            $result     = mysqli_query($db, $query);
-            $rows       = mysqli_num_rows($result);
-            if ($rows != 0) { 
-                    $_SESSION['email'] = $_POST['email'];
-               
-                    header('Location: index.php');  
-            //jika gagal maka akan menampilkan pesan error
-            } else {
-                $error =  'Login Gagal';
-            }
-            
-        // }else {
-        //     $error =  'Data tidak boleh kosong !!';
-        // }
-    } 
+if(empty($_POST['g-recaptcha-response'])){
+  $captcha_error = 'Captcha is required';
+ }else{
+  $secret_key = '6LccTZUnAAAAAN7XgHGreSkdVph1zzUhFZiVJ9jD';
+  $response = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret_key.'&response='.$_POST['g-recaptcha-response']);
+  $response_data = json_decode($response);
+  if(!$response_data->success){
+   $captcha_error = 'Captcha verification failed';
+  }
+ }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<!-- meta tags -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
- 
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-<!-- costum css -->
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-        <section class="container-fluid mb-4">
-            <!-- justify-content-center untuk mengatur posisi form agar berada di tengah-tengah -->
-            <section class="row justify-content-center">
-            <section class="col-12 col-sm-6 col-md-4">
-                <form class="form-container" action="login.php" method="POST">
-                    <h4 class="text-center font-weight-bold"> Sign-In </h4>
-                    <?php if($error != ''){ ?>
-                        <div class="alert alert-danger" role="alert"><?= $error; ?></div>
-                    <?php } ?>
-                   
-                    <div class="form-group">
-                        <label for="email">Username</label>
-                        <input type="text" class="form-control" id="email" name="email" placeholder="Masukkan email">
-                    </div>
-                    <div class="form-group">
-                        <label for="InputPassword">Password</label>
-                        <input type="password" class="form-control" id="InputPassword" name="password" placeholder="Password">
-                        <?php if($validate != '') {?>
-                            <p class="text-danger"><?= $validate; ?></p>
-                        <?php }?>
-                    </div>
-                 
-                    <button type="submit" name="submit" class="btn btn-primary btn-block">Sign In</button>
-                    <div class="form-footer mt-2">
-                        <p> Belum punya account? <a href="register.php">Register</a></p>
-                    </div>
-                </form>
-            </section>
-            </section>
-        </section>
-    <!-- Bootstrap requirement jQuery pada posisi pertama, kemudian Popper.js, dan  yang terakhit Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-</body>
+<html>  
+    <head>  
+        <title>Membuat Google Recaptcha Dengan PHP</title>  
+          <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+          <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    </head>  
+    <body>  
+    <div class="container" style="width: 600px">
+   <h3 align="center">Membuat Google Recaptcha Dengan PHP</a></h3>
+   <div class="panel panel-default">
+      <div class="panel-heading">Register Form</div>
+    <div class="panel-body">
+     <form metod="post" id="captcha_form">
+      <div class="form-group">
+       <label>Email Address <span class="text-danger">*</span></label>
+       <input type="text" name="email" id="email" class="form-control" />
+       <span id="email_error" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+       <label>Password <span class="text-danger">*</span></label>
+       <input type="password" name="password" id="password" class="form-control" />
+       <span id="password_error" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+       <div class="g-recaptcha" data-sitekey="6LccTZUnAAAAABNJMBxm9t1WnVWFL9AVtwfuL_xi"></div>
+       <span id="captcha_error" class="text-danger"></span>
+      </div>
+      <div class="form-group">
+       <input type="submit" name="register" id="register" class="btn btn-info" value="Register" />
+      </div>
+     </form>
+     
+    </div>
+   </div>
+  </div>
+    </body>  
 </html>
+
+<script>
+$(document).ready(function(){
+
+ $('#captcha_form').on('submit', function(event){
+  event.preventDefault();
+  $.ajax({
+   url:"process_data.php",
+   method:"POST",
+   data:$(this).serialize(),
+   dataType:"json",
+   beforeSend:function(){
+    $('#register').attr('disabled','disabled');
+   },
+   success:function(data){
+    $('#register').attr('disabled', false);
+    if(data.success){
+     $('#captcha_form')[0].reset();
+     $('#email_error').text('');
+     $('#password_error').text('');
+     $('#captcha_error').text('');
+     grecaptcha.reset();
+     alert('Form Successfully validated');
+    }else{
+     $('#email_error').text(data.email_error);
+     $('#password_error').text(data.password_error);
+     $('#captcha_error').text(data.captcha_error);
+    }
+   }
+  })
+ });
+
+});
+</script>
